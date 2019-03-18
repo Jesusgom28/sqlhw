@@ -1,0 +1,160 @@
+SELECT first_name, last_name
+FROM actor;
+
+SELECT UPPER(CONCAT(first_name, ' ', last_name)) AS 'Actor Name'
+FROM actor;
+
+SELECT actor_id, first_name, last_name
+FROM actor
+WHERE first_name = "joe";
+
+SELECT *
+FROM actor
+WHERE last_name LIKE '%GEN%';
+
+SELECT last_name, first_name
+FROM actor
+WHERE last_name LIKE '%LI%'
+ORDER BY last_name, first_name;
+
+SELECT country_id, country
+FROM country
+WHERE country IN ('Afghanistan', 'Bangladesh', 'China');
+
+SELECT last_name, COUNT(*) AS cnt
+FROM actor
+GROUP BY last_name DESC HAVING cnt > 2 ORDER BY cnt  ;
+-- option 1
+SELECT * 
+FROM actor 
+WHERE first_name = "GROUCHO" AND last_name = "WILLIAMS";
+
+UPDATE actor SET first_name = "HARPO" 
+WHERE actor_id = 172;
+-- option 2
+UPDATE actor SET first_name = "HARPO" 
+WHERE first_name = "GROUCHO" AND last_name = "WILLIAMS";
+
+UPDATE actor
+ SET first_name = 
+ CASE 
+ WHEN first_name = 'HARPO' 
+ THEN 'GROUCHO'
+ ELSE 'MUCHO GROUCHO'
+ END
+ WHERE actor_id = 172;
+
+SHOW CREATE TABLE address
+
+
+SELECT address, first_name, last_name
+FROM staff s
+INNER JOIN address a ON s.address_id = a.address_id;
+
+SELECT first_name, last_name, SUM(amount)
+FROM staff s
+INNER JOIN payment p
+ON s.staff_id = p.staff_id
+GROUP BY s.first_name, s.last_name;
+
+SELECT COUNT(actor_id), title
+FROM film f
+INNER JOIN film_actor fa
+ON f.film_id = fa.film_id
+GROUP BY title;
+
+SELECT COUNT(inventory_id)
+FROM film f
+INNER JOIN inventory i
+ON f.film_id = i.film_id
+WHERE title = "Hunchback Impossible";
+
+SELECT SUM(amount), first_name, last_name
+FROM payment p
+INNER JOIN customer c
+ON p.customer_id = c.customer_id
+GROUP BY p.customer_id
+ORDER BY last_name ASC;
+
+SELECT title FROM film 
+WHERE language_id in
+	(SELECT language_id FROM language
+	WHERE name = "English")
+AND (title LIKE 'K%' OR title LIKE 'Q%');
+
+SELECT first_name, last_name
+FROM actor
+WHERE actor_id IN
+(
+  SELECT actor_id
+  FROM film_actor
+  WHERE film_id IN
+  (
+   SELECT film_id
+   FROM film
+   WHERE title = 'Alone Trip'
+  )
+);
+
+SELECT country, last_name, first_name, email
+FROM country 
+LEFT JOIN customer 
+ON country.country_id = customer.customer_id
+WHERE country = 'Canada';
+
+USE sakila;
+SELECT title, category
+FROM film_list
+WHERE category = "Family";
+
+SELECT title, COUNT(f.film_id) AS "Rental_Count" 
+FROM film f
+JOIN inventory i
+ON (f.film_id= i.film_id)
+JOIN rental r
+ON (i.inventory_id = r.inventory_id)
+GROUP BY title ORDER BY Rental_Count DESC;
+
+SELECT sum(p.amount), s.store_id
+FROM payment p
+JOIN staff s
+ON (p.staff_id = s.staff_id)
+GROUP BY store_id;
+
+SELECT store_id, city, country
+FROM store st
+JOIN address ad 
+ON (st.address_id = ad.address_id)
+JOIN city cit
+ON (ad.city_id = cit.city_id)
+JOIN country co
+ON (cit.country_id = co.country_id);
+
+SELECT c.name AS "Top 5", SUM(p.amount) AS "Gross" 
+FROM category c
+JOIN film_category fc
+ON (c.category_id=fc.category_id)
+JOIN inventory i 
+ON (fc.film_id=i.film_id)
+JOIN rental r 
+ON (i.inventory_id=r.inventory_id)
+JOIN payment p 
+ON (r.rental_id=p.rental_id)
+GROUP BY c.name ORDER BY Gross  LIMIT 5;
+
+CREATE VIEW top_five_grossing_genres AS
+SELECT name, SUM(p.amount)
+FROM category c
+JOIN film_category fc
+JOIN inventory i
+ON i.film_id = fc.film_id
+JOIN rental r
+ON r.inventory_id = i.inventory_id
+JOIN payment p
+GROUP BY name
+LIMIT 5;
+
+
+SELECT * FROM Top_Five_Genres;
+
+DROP VIEW Top_Five_Genres;
